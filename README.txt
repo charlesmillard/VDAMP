@@ -1,15 +1,17 @@
 The Varible Density Approximate Message Passing (VDAMP) algorithm for reconstruction 
 of an image from Fourier coefficients sampled with variable density, reproducing figures from 
-"Approximate Message Passing with Colored State Evolution for Variable Density Fourier Sampled Images" [https://arxiv.org/abs/2003.02701] and the preliminary work
-"An Approximate Message Passing algorithm for Rapid Parameter-Free Compressed sensing MRI" [https://arxiv.org/abs/1911.01234]
+"Approximate Message Passing with Colored State Evolution for Variable Density Fourier Sampled Images" 
+[https://arxiv.org/abs/2003.02701] 
+and the preliminary work
+"An Approximate Message Passing algorithm for Rapid Parameter-Free Compressed sensing MRI" 
+[https://arxiv.org/abs/1911.01234]
 by Charles Millard, Aaron T Hess, Boris Mailhe and Jared Tanner. 
 
-All experiments are performed on a 512x512 Shepp-Logan.
 
 demo1 runs VDAMP only, reproducing the figures that provide evidence of VDAMP's state evolution and additional figures on tracking errors. 
 
-demo2 runs VDAMP-alpha, VDAMP-S, FISTA  and SURE-IT for three undersampling schemes, reproducing the remaining figures.
-If experimental parameters are changes the lambda of FISTA can be re-tuned with an exhaustive line search.
+demo2 runs VDAMP-alpha, VDAMP-S, FISTA, S-FISTA  and SURE-IT, reproducing the remaining, comparative figures, and the results from the tables. 
+
 
 If you have any questions/comments, please feel free to contact Charles (Charlie) Millard at
 <millard@maths.ox.ac.uk> or Boris Mailhe <boris.mailhe@siemens-healthineers.com>

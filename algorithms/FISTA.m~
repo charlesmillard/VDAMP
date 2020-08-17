@@ -1,5 +1,5 @@
 function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
-%    The FISTA, S-FISTA (SISTA) or SUREIT algorithm with for
+%    The FISTA, SISTA or SUREIT algorithm with subband-wise wieghing for
 %    image reconstruction from Fourier coefficients, where
 %    a sparse model on Haar wavelet coefficients is assumed
 %    IN:
@@ -29,7 +29,7 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
 %                   r1: (nx*ny*maxIter) image representation of vector
 %                   subject to thresholding (if saveHist == 0, saves last
 %                   only)
-%                   x: (nx*ny*maxIter) image estimate
+x: 
 %
 % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
 % European Medicines Agency (EMA) clearance or CE mark. The Software is intended research purposes only,
@@ -131,7 +131,8 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
                 for i = 1:numel(subbands)
                     band_name = subbands{i};
                     C{s}.(band_name) = z_wav{s}.(band_name)./sista_div{s}.(band_name);
-                end           
+                end
+               
         end
     else    
         C = multiscaleDecomp(r, scales);
@@ -171,10 +172,13 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
         
         % thresholding
         if sureFlag
-            C_thr = multiscaleSUREsoft(C, tau);
+            C_thr_new = multiscaleSUREsoft(C, tau);
         else      
-            C_thr = multiscaleComplexSoft(C, tau, lambda);
+            C_thr_new = multiscaleComplexSoft(C, tau, lambda);
         end
+        
+
+        C_thr = C_thr_new;
         
         x_new = multiscaleRecon(C_thr);
         x_old = x;
@@ -228,7 +232,12 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
         end
         tau{scales}.A = var_est;  
     end
-
+    
+    Nit = sum(hist.timer>0);
+    
+    hist.x_mse = hist.x_mse(1:Nit);
+    hist.timer = hist.timer(1:Nit);
+    
     if ~saveHist
         hist.r1 = r;
     end

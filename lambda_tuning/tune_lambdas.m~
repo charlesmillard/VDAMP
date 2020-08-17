@@ -1,3 +1,13 @@
+% Tune sparse weighting of FISTA and SISTA with an exhaustive search
+%
+%
+% The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
+% European Medicines Agency (EMA) clearance or CE mark. The Software is intended for research purposes only,
+% not for diagnostic or clinical use.
+%
+% Copyright (C) 2020  Charles Millard
+% Copyright (C) 2020  Siemens Healthineers
+
 clear all;
 
 all_ims = {'shepplogan', 'brain', 'cardiac', 'barbara', 'boat',  'cameraman', 'house', 'peppers'};
@@ -25,6 +35,7 @@ save('fista_opt', 'fista_opt_all');
 save('sista_opt', 'sista_opt_all');
 
 function [fista_opt, sista_opt] = exh_search(im_type, target_delta)
+    % finds
     rng('default');
     rng(811);
 

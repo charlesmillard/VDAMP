@@ -4,14 +4,14 @@
 % Uses pre-tuned sparse weighting lambdas in lambda_tuning folder. Also
 % uses pre-determined per-subband sista weights from sista_weights folder.
 %
-% Note that to run any reconstruction tasks, it is necessary to use
+% Note that it is necessary to use
 % an image type and acceleration factor N/n used in the paper: 4,6,8 for
 % all images except the shepp-logan, which uses 8, 10 12. If you would like
-% to run FISTA/SISTA with other masks, you can use the scipts in lambda_tuning 
-% and sista_weights to select them
+% to run FISTA/SISTA with other masks, images, or number of decomposition 
+% scales s, you can use the scripts in lambda_tuning and sista_weights to select them
 %
 % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
-% European Medicines Agency (EMA) clearance or CE mark. The Software is intended research purposes only,
+% European Medicines Agency (EMA) clearance or CE mark. The Software is intended for research purposes only,
 % not for diagnostic or clinical use.
 %
 % Copyright (C) 2020  Charles Millard
@@ -40,7 +40,7 @@ end
 x0 = double(rescale(x0));
 [nx, ny] = size(x0);
 
-%%
+%% lustig's VDS scheme 
 
 prob_map = genPDF([nx,ny], 8, target_delta, 2, 0,0);
 
@@ -64,7 +64,6 @@ opts.rho = 1;
 opts.saveHist = 0;
 opts.scales = 4;
 opts.maxTime = 10000;
-opts.stopDelta = 0;
 
 %% load pre-tuned sista weights
 try
@@ -95,23 +94,26 @@ end
 if strcmp(im_type, 'shepplogan')
     opts.maxIter = 1000;
 else 
-    opts.maxIter = 500;
+    opts.maxIter = 100;
 end
 
 % FISTA
 opts.lambda = lambda_ista;    
 opts.SURE = 0;
+opts.sista_div = 1;
 disp('Running FISTA...')
 [x_ista, hist_ista]  = FISTA(dcoil, mask, x0, opts);
 
 % S-FISTA
 opts.lambda = lambda_sista;
 opts.SURE = 0;
+opts.sista_div = sista_div;
 disp('Running SISTA...')
-[x_sista, hist_sista]  = SISTA(dcoil,  mask, x0, opts);
+[x_sista, hist_sista]  = FISTA(dcoil,  mask, x0, opts);
 
 % SURE-IT
 opts.SURE = 1;
+opts.sista_div = 1;
 disp('Running SURE-IT...')
 [x_sureit, hist_sureit] = FISTA(dcoil,  mask, x0, opts);
 
@@ -270,11 +272,6 @@ legend('FISTA', 'S-FISTA', 'SURE-IT','VDAMP-\alpha', 'VDAMP-S');
 title(['N/n =', num2str(round(1/delta))])
 hold off
 
-
-%% kurtosis
-w0 = multiscaleDecomp(x0, opts.scales);
-
-
 %% iters until within 1dB of convergent NMSE
 
 conv_thr = 0.1;
@@ -285,6 +282,7 @@ conv_sureit = find(abs(NMSE(hist_sureit.x_mse) - NMSE(hist_sureit.x_mse(end)))<c
 conv_vdamp = find(abs(NMSE(hist_vdamp.x_mse) - NMSE(hist_vdamp.x_mse(end)))<conv_thr ,1);
 conv_vdamp_s = find(abs(NMSE(hist_vdamp_s.x_mse) - NMSE(hist_vdamp_s.x_mse(end)))<conv_thr ,1);
 
+w0 = multiscaleDecomp(x0, opts.scales);
 
 disp('** FISTA **')
 [re, im] = subband_kurtosis(w0, hist_ista.r1(:,:,end));

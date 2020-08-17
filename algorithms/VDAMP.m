@@ -23,11 +23,13 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
 %      OUT:
 %         x_hat: VDAMP's x0 estimate
 %         hist:  history object formed with attributes:
-%               timer: (maxIter) time at every iteration
-%               Cthr: (nx,ny,maxIter) post-thresholding estimate in wavelet domain
+%               timer: (maxIter) time at every iteration             
 %               x_mse: (maxIter) ground truth mean-squared error of x              
 %               **the following are saved only if saveHist == 1**:
-%                   r1: (nx*ny*maxIter) image representation of vector subject to thresholding
+%                   r1: (nx*ny*maxIter) image representation of vector
+%                   subject to thresholding (if saveHist == 0, saves last
+%                   only)
+%                   Cthr: (nx,ny,maxIter) post-thresholding estimate in wavelet domain
 %                   true_err_C: (maxIter*4*scales) band-wise ground truth RMSE of r, order H, V, D, A...
 %                            Those scales without A have zeros
 %                   belief_std_C: (maxIter*4*scales) estimate of band-wise RMSE of r

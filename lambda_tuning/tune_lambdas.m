@@ -35,6 +35,7 @@ save('fista_opt', 'fista_opt_all');
 save('sista_opt', 'sista_opt_all');
 
 function [fista_opt, sista_opt] = exh_search(im_type, target_delta)
+    % finds best lambda for im_type at target_delta = n/N
     rng('default');
     rng(811);
 

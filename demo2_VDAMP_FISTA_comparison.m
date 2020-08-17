@@ -4,11 +4,12 @@
 % Uses pre-tuned sparse weighting lambdas in lambda_tuning folder. Also
 % uses pre-determined per-subband sista weights from sista_weights folder.
 %
-% Note that to run any reconstruction tasks, it is necessary to use
+% Note that it is necessary to use
 % an image type and acceleration factor N/n used in the paper: 4,6,8 for
-% all images except the shepp-logan, which uses 8, 10 12. If you would like
-% to run FISTA/SISTA with other masks, you can use the scipts in lambda_tuning 
-% and sista_weights to select them
+% all images except the shepp-logan, which uses 8, 10 12, else the pre-tuning. 
+% will not be available. If you would like
+% to run FISTA/SISTA with other masks, images, or number of decomposition 
+% scales s, you can use the scripts in lambda_tuning and sista_weights to select them
 %
 % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
 % European Medicines Agency (EMA) clearance or CE mark. The Software is intended for research purposes only,
