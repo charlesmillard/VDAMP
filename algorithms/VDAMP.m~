@@ -90,10 +90,10 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
         denoiserDiv = 1;
     end
     
-    if (isfield(opts,'wavType') && ~isempty(opts.wavType)) 
-        wavType = opts.wavType;
+    if (isfield(opts,'denoiserDiv') && ~isempty(opts.denoiserDiv)) 
+        denoiserDiv = opts.denoiserDiv;
     else
-        wavType = 'haar';
+        denoiserDiv = 1;
     end
     
     if sureFlag  == 0 
@@ -127,10 +127,10 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
         lambda{scales}.A = sparse_weight/100;
     end
     
-    specX = WavSpec(scales, nx, wavType);
-    specY = WavSpec(scales, ny, wavType);
+    specX = HaarSpec(scales, nx, wav_type);
+    specY = HaarSpec(scales, ny, wav_type);
     
-    W0 = multiscaleDecomp(x0, scales, wavType);
+    W0 = multiscaleDecomp(x0, scales);
     
     
     inv_p = prob_map.^(-1);
@@ -139,7 +139,7 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
     % unbaised initialisation
     m2 = inv_p.*mask.*dcoil;
     r = ifftnc(m2);
-    C = multiscaleDecomp(r, scales, wavType);
+    C = multiscaleDecomp(r, scales);
     
     % calculate initial tau
     y_cov = mask.*( inv_p_m1 .* inv_p .* abs(dcoil).^2 + inv_p.*var0); % k-space error model
@@ -214,7 +214,7 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
         C_thr = C_thr_new;
         
         % calculate x estimate and MSE via unweighted density compensatoin
-        xk_tilde = multiscaleRecon(C_thr, wavType);
+        xk_tilde = multiscaleRecon(C_thr);
         x_tilde_ft = fftnc(xk_tilde);
         z2 = mask.*(dcoil - x_tilde_ft);
         xk = ifftnc(x_tilde_ft + z2);
@@ -272,11 +272,11 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
         end
       
         % ****Reweighted gradient step****
-        r_tilde = multiscaleRecon(C_tilde, wavType);
+        r_tilde = multiscaleRecon(C_tilde);
         z = mask.*(dcoil - fftnc(r_tilde));
         
         r = r_tilde + ifftnc(inv_p .* z);    
-        C = multiscaleDecomp(r, scales, wavType);
+        C = multiscaleDecomp(r, scales);
                 
         % coloured noise power spectrum re-estimation
         y_cov = mask.* (inv_p_m1 .* inv_p .* abs(z).^2+ inv_p.*var0);

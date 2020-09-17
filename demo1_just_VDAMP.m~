@@ -1,5 +1,4 @@
-% Detailed evaluation of only VDAMP. Feel free to change the image type,
-% undersampling factor and algorithm opts
+% Detailed evaluation of only VDAMP. Feel free to change 
 %
 % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
 % European Medicines Agency (EMA) clearance or CE mark. The Software is intended for research purposes only,
@@ -17,7 +16,7 @@ rng(811);
 
 %% im_type options are 'shepplogan' or those listed in test_images folder
 
-im_type = 'brain'; 
+im_type = 'shepplogan'; 
 
 target_delta = 1/5; % n/N
 
@@ -52,11 +51,11 @@ dcoil = mask.*(fftnc(x0) + noise);
 opts.maxIter = 30;
 opts.maxTime = 100;
 opts.verbose =0 ;
-opts.scales = 4;
+opts.scales = 1;
 opts.SURE = 1;
 opts.saveHist = 1;
-opts.wavType = 'db1';
-opts.denoiserDiv = 1; % 1 for VDAMP-S or 2 for VDAMP-alpha
+opts.wavType = 'db2';
+opts.denoiserDiv = 2; % 1 for VDAMP-S or 2 for VDAMP-alpha
 
 %% Run VDAMP
 t = tic;

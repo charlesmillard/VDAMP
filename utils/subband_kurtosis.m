@@ -1,4 +1,4 @@
-function [meank_re, meank_im] = subband_kurtosis(w0, r1)
+function [meank_re, meank_im] = subband_kurtosis(w0, r1, wavType)
 % calculates the real and imaginary parts of the mean subband-wise kurtosis of r1
 %
 %
@@ -16,7 +16,7 @@ k_im = zeros(3,scales);
 
 
 
-C = multiscaleDecomp(r1,scales);
+C = multiscaleDecomp(r1,scales, wavType);
 
 for s = 1:scales
     k(1,s) =  kurtosis(real(C{s}.H(:) - w0{s}.H(:)));

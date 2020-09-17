@@ -1,5 +1,4 @@
-% Detailed evaluation of only VDAMP. Feel free to change the image type,
-% undersampling factor and algorithm opts
+% Detailed evaluation of only VDAMP. Feel free to change 
 %
 % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
 % European Medicines Agency (EMA) clearance or CE mark. The Software is intended for research purposes only,
@@ -17,7 +16,7 @@ rng(811);
 
 %% im_type options are 'shepplogan' or those listed in test_images folder
 
-im_type = 'brain'; 
+im_type = 'cameraman'; 
 
 target_delta = 1/5; % n/N
 
@@ -55,7 +54,7 @@ opts.verbose =0 ;
 opts.scales = 4;
 opts.SURE = 1;
 opts.saveHist = 1;
-opts.wavType = 'db1';
+opts.wavType = 'db4';
 opts.denoiserDiv = 1; % 1 for VDAMP-S or 2 for VDAMP-alpha
 
 %% Run VDAMP
@@ -63,6 +62,12 @@ t = tic;
 [x_hat, hist]  = VDAMP(dcoil,  mask, prob_map, var0, x0, opts);
 timer = toc(t);
 
+%%
+opts.lambda = 40;
+opts.SURE = 0;
+t = tic;
+[x_fista, hist_fista]  = FISTA(dcoil, mask, x0, opts);
+timer = toc(t);
 
 %% How well is the error modelled by tau? 
 
@@ -112,115 +117,6 @@ for s = 1:opts.scales
 end
 
 legend({'True Horizontal', 'Horizontal Model', 'True Vertical', 'Vertical Model',  'True Diagonal', 'Diagonal Model', 'True Coarse', 'Coarse Model'}, 'NumColumns', 4)
-%% Visualise difference in wavelet domain. 
-
-I0 = pyramid(w0);
-it_choice = [2, 3, 4]; % which iterations to look at
-
-%
-figure('Name', 'Difference between r and ground truth');
-for iter = 1:numel(it_choice)  
-    subplot(1,numel(it_choice),iter);
-    ii = it_choice(iter);
-    
-    C = multiscaleDecomp(hist.r1(:,:,ii),opts.scales, opts.wavType);
-    IC = pyramid(C);
-    diff = abs(IC-I0);
-    
-    if iter == 1
-        thr = 0.3; % choose clip
-        diff(diff>thr)= thr;
-        diff = rescale(diff);
-    else
-        diff(diff>thr) = thr;
-        diff = rescale(diff)*max(diff(:))/thr;
-    end
-
-    
-    imagesc(diff, [0, 1]); colormap jet;
-    title(['k=', num2str(ii-1)]);
-    colorbar off;
-    axis image off;
-    set(gca,'FontName','times')
-end
-
-%% QQ plots - is the effective noise Gaussian? 
-
-it_choice = [1, 6, 21]; % which iterations to look at
-
-div = 1; %normalisation
-qqylim = [-1, 1];
-
-
-figure('Name', 'QQ plots');
-for iter = 1:numel(it_choice)
-    subplot(3,numel(it_choice),iter);
-    ii = it_choice(iter);
-    C = multiscaleDecomp(hist.r1(:,:,ii),opts.scales, opts.wavType);
-    
-    diff = (w0{1}.D - C{1}.D)/div; 
-    
-    p = qqplot(real(diff(:)));
-    set(p, 'Marker', '.');
-    
-    xh = xlabel('Standard normal quantiles');
-    set(xh, 'FontName', 'times');
-    set(gca,'FontSize',8)
-    
-    yh = ylabel('Quantiles of input sample');
-    set(yh, 'FontName', 'times');
-    
-    axis square;
-    title(['Diagonal, scale 1, k=', num2str(ii-1)], 'FontWeight','bold', 'FontName', 'Times new roman');
-    ylim([-1 1]);
-    xlim([-5, 5]);
-end
-
-for iter = 1:numel(it_choice) 
-    subplot(3,numel(it_choice),iter+numel(it_choice));
-    ii = it_choice(iter);
-    C = multiscaleDecomp(hist.r1(:,:,ii),opts.scales, opts.wavType);
-    
-    diff = (w0{2}.H - C{2}.H)/div; 
-    
-    p = qqplot(imag(diff(:)));
-    set(p, 'Marker', '.');
-    
-    xh = xlabel('Standard normal quantiles');
-    set(xh, 'FontName', 'times');
-    
-    yh = ylabel('Quantiles of input sample');
-    set(yh, 'FontName', 'times');
-    axis square;
-    set(gca,'FontSize',8)
-    
-    title(['Horizonal, scale 2, k=', num2str(ii-1)], 'FontWeight','bold', 'FontName', 'Times new roman');
-    ylim([-1 1]);
-    xlim([-5, 5]);
-end
-
-for iter = 1:numel(it_choice)
-    subplot(3,numel(it_choice),iter+2*numel(it_choice));
-    ii = it_choice(iter);
-    C = multiscaleDecomp(hist.r1(:,:,ii),opts.scales, opts.wavType);
-    
-    diff = (w0{4}.V - C{4}.V)/div; 
-    
-    p = qqplot(real(diff(:)));
-    set(p, 'Marker', '.');
-    xh = xlabel('Standard normal quantiles');
-    set(xh, 'FontName', 'times');
-    
-    yh = ylabel('Quantiles of input sample');
-    set(yh, 'FontName', 'times');
-    axis square;
-    set(gca,'FontSize',8)
-    
-    title(['Vertical, scale 4, k=', num2str(ii-1)], 'FontWeight','bold', 'FontName', 'Times new roman');
-    ylim([-1 1]);
-    xlim([-5, 5]);
-end
-
 
 %% view reconstructed image
 
@@ -238,8 +134,8 @@ axis image off;
 title('VDAMP')
 
 subplot(2,2,3)
-imshow(abs(ifftnc(dcoil)), [0 max(x0(:))]);
-title('Zero-filled')
+imshow(abs(x_fista), [0 max(x0(:))]);
+title('FISTA')
 
 subplot(2,2,4)
 imagesc(abs(x_hat-x0)); 
@@ -249,6 +145,28 @@ colorbar off;
 title('VDAMP error')
 
 %%
+x_mnsq = mean(abs(x0(:)).^2);
+NMSE = @(x_mse) 10*log10(x_mse./x_mnsq);
+
+line_colour =  [0.1, 0.6, 0; 1, 0.8, 0; 1, 0, 0; 0, 0.5, 1; 0,0,0];
+
+figure('Renderer', 'painters', 'Position', [10 10 200 200]);
+hold on;
+plot([0: numel(hist_fista.x_mse)-1 ], [NMSE(hist_fista.x_mse)], '--', 'LineWidth', 1.5, 'Color', line_colour(1,:));
+plot([0: numel(hist.x_mse)-1 ], [NMSE(hist.x_mse)], '-', 'LineWidth', 1.5, 'Color',line_colour(3,:));
+
+xlabel(['Iteration k']);
+
+ylabel('NMSE (dB)');
+
+set(gca, 'FontName', 'Times' );
+grid on
+
+legend('FISTA', 'VDAMP');
+title(['N/n =', num2str(round(1/delta))])
+hold off
+
+%%
 
 disp(['Undersampling factor: ', num2str(1/delta)])
 
@@ -256,6 +174,8 @@ x_mnsq = mean(abs(x0(:)).^2);
 NMSE = @(x_mse) 10*log10(x_mse./x_mnsq);
 
 disp(['NMSE is: ', num2str(NMSE(immse(x0,x_hat)))])
+
+disp(['NMSE FISTA is: ', num2str(NMSE(immse(x0,x_fista)))])
 
 %% Subband-wise kurtosis
 

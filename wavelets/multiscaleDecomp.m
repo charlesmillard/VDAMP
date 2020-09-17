@@ -1,4 +1,4 @@
-function bands = multiscaleDecomp(A, scales)
+function bands = multiscaleDecomp(A, scales, wav_type)
 % Perform a Haar wavelet decomposition    
 % IN: 
 %   A: image
@@ -16,7 +16,7 @@ function bands = multiscaleDecomp(A, scales)
     bands = cell(scales, 1);
     
     for s=1:scales
-        [A, H, V, D] = dwt2(A, 'haar');
+        [A, H, V, D] = dwt2(A, wav_type, 'mode', 'per');
         bands{s} = struct( ...
             'H', H, ...
             'V', V, ...

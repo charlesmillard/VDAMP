@@ -1,0 +1,67 @@
+function spec = WavSpec(scales, sample, wav_type)
+    % Compute power spectrum of Haar wavelet filters at multiple scales
+    % IN:
+    %   scales: number of decomposition scales
+    %   sample: sample dimensionality
+    % OUT:
+    %   spec: power spectrum
+    %
+    % The Software does not have 510K approval,  U.S. Food and Drug Administration (FDA) clearance,
+    % European Medicines Agency (EMA) clearance or CE mark. The Software is intended research purposes only,
+    % not for diagnostic or clinical use.
+    %
+    % Copyright (C) 2019  Charles Millard
+    % Copyright (C) 2019  Siemens Healthineers
+    [Lo,Hi] = wfilters(wav_type);
+    Nwav = numel(Lo);
+    
+    spec = zeros(sample, scales, 2);
+    
+    if Nwav^scales > sample
+        error('Cannot compute PSD with this method - reduce number of scales or size of mother wavelet')
+    end
+    
+    for s=1:scales
+        % compute band-pass
+        filtLen = Nwav^s;
+        filt = zeros(sample,1);
+        filt(1:filtLen) = imresize(Lo, [1, filtLen], 'method', 'box')./sqrt(2^(s-1));
+        spec(:, s, 1) = abs(fftnc(filt)).^2;
+        
+        filt = zeros(sample,1);
+        filt(1:filtLen) = imresize(Hi, [1, filtLen], 'method', 'box')./sqrt(2^(s-1));
+        
+        spec(:, s, 2) = abs(fftnc(filt)).^2;
+    end
+    
+        for s=1:scales
+        % compute band-pass
+        filtLen = Nwav^s;
+        filt = zeros(sample,1);
+        filt(1:filtLen) = imresize(Lo, [1, filtLen], 'method', 'box')./sqrt(2^(s-1));
+        spec(:, s, 1) = abs(fftnc(filt)).^2;
+        
+        filt = zeros(sample,1);
+        filt(1:filtLen) = imresize(Hi, [1, filtLen], 'method', 'box')./sqrt(2^(s-1));
+        
+        spec(:, s, 2) = abs(fftnc(filt)).^2;
+    end
+    
+%     for s=1:scales
+%         %compute band-pass
+%         filtLen = Nwav^s;
+%         if s==1
+%             filtLo = zeros(sample,1);
+%             filtHi = zeros(sample,1);
+%             filtLo(1:filtLen) = Lo;
+%             filtHi(1:filtLen) = Hi;
+%             spec(:, s, 1) = abs(fftnc(filtLo)).^2;
+%             spec(:, s, 2) = abs(fftnc(filtHi)).^2;
+%         else
+%             [A, C] = dwt(filtLo, wav_type);
+%             spec(:, s, 1) = abs(fftnc(A)).^2;
+%             spec(:, s, 2) = abs(fftnc(C)).^2;
+%         end
+% 
+%     end
+end

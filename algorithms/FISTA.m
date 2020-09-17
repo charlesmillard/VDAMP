@@ -88,6 +88,13 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
         sista_div = 1;
     end
     
+    if (isfield(opts,'wavType') && ~isempty(opts.wavType)) 
+        wavType = opts.wavType;
+    else
+        wavType = 'haar';
+    end
+    
+    
     if sureFlag  == 0 
          if (isfield(opts,'lambda') && ~isempty(opts.lambda))
              sparse_weight = opts.lambda;
@@ -120,12 +127,12 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
         end
     end
     
-    W0 = multiscaleDecomp(x0, scales);
+    W0 = multiscaleDecomp(x0, scales, wavType);
 
     r = ifftnc(mask.*dcoil);
     
     if iscell(sista_div)
-        z_wav = multiscaleDecomp(r, scales);
+        z_wav = multiscaleDecomp(r, scales, wavType);
         for s=1:scales
             subbands = fieldnames(z_wav{s});           
                 for i = 1:numel(subbands)
@@ -134,7 +141,7 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
                 end           
         end
     else    
-        C = multiscaleDecomp(r, scales);
+        C = multiscaleDecomp(r, scales, wavType);
     end
     
     var_est = immse(pyramid(C), pyramid(W0));
@@ -176,7 +183,7 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
             C_thr = multiscaleComplexSoft(C, tau, lambda);
         end
         
-        x_new = multiscaleRecon(C_thr);
+        x_new = multiscaleRecon(C_thr, wavType);
         x_old = x;
       
         if fistaFlag == 1
@@ -194,8 +201,8 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
         % gradient step
         z = dcoil - mask.*fftnc(x);       
         if iscell(sista_div)
-            z_wav = multiscaleDecomp(ifftnc(z), scales);
-            x_wav = multiscaleDecomp(x, scales);
+            z_wav = multiscaleDecomp(ifftnc(z), scales, wavType);
+            x_wav = multiscaleDecomp(x, scales, wavType);
             for s=1:scales
                 subbands = fieldnames(C_thr{s});           
                     for i = 1:numel(subbands)
@@ -206,7 +213,7 @@ function [x_hat, hist] = FISTA(dcoil, mask, x0, opts)
             end
         else    
             r = x+ifftnc(z);
-            C = multiscaleDecomp(r, scales);
+            C = multiscaleDecomp(r, scales, wavType);
         end
         
         x_hat = ifftnc(mask.*z) + x_new; % current estimate
