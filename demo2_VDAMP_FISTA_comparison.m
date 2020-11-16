@@ -65,7 +65,7 @@ opts.rho = 1;
 opts.saveHist = 0;
 opts.scales = 4;
 opts.maxTime = 10000;
-
+opts.wavType = 'db1';
 %% load pre-tuned sista weights
 try
     load(['sista_weights/', num2str(nx), 'x', num2str(ny), '/us_fac', num2str(round(1/target_delta))]);
@@ -283,34 +283,34 @@ conv_sureit = find(abs(NMSE(hist_sureit.x_mse) - NMSE(hist_sureit.x_mse(end)))<c
 conv_vdamp = find(abs(NMSE(hist_vdamp.x_mse) - NMSE(hist_vdamp.x_mse(end)))<conv_thr ,1);
 conv_vdamp_s = find(abs(NMSE(hist_vdamp_s.x_mse) - NMSE(hist_vdamp_s.x_mse(end)))<conv_thr ,1);
 
-w0 = multiscaleDecomp(x0, opts.scales);
+w0 = multiscaleDecomp(x0, opts.scales, opts.wavType);
 
 disp('** FISTA **')
-[re, im] = subband_kurtosis(w0, hist_ista.r1(:,:,end));
+[re, im] = subband_kurtosis(w0, hist_ista.r1(:,:,end), opts.wavType);
 disp(['NMSE: ', num2str(NMSE(hist_ista.x_mse(end)))])
 disp(['Convergent index/time: ', num2str([conv_ista, hist_ista.timer( conv_ista)])])
 disp(['Kurtosis re/im: ' , num2str([re, im])])
 
 disp('** SISTA **')
-[re, im] =  subband_kurtosis(w0, hist_sista.r1(:,:,end));
+[re, im] =  subband_kurtosis(w0, hist_sista.r1(:,:,end), opts.wavType);
 disp(['NMSE: ', num2str(NMSE(hist_sista.x_mse(end)))])
 disp(['Convergent index/time: ', num2str([conv_sista, hist_sista.timer( conv_sista)])])
 disp(['Kurtosis re/im: ' , num2str([re, im])])
 
 disp('** SUREIT **')
-[re, im] = subband_kurtosis(w0, hist_sureit.r1(:,:,end));
+[re, im] = subband_kurtosis(w0, hist_sureit.r1(:,:,end), opts.wavType);
 disp(['NMSE: ', num2str(NMSE(hist_sureit.x_mse(end)))])
 disp(['Convergent index/time: ', num2str([conv_sureit, hist_sureit.timer( conv_sureit)])])
 disp(['Kurtosis re/im: ' , num2str([re, im])])
 
 disp('** VDAMP **')
-[re, im] = subband_kurtosis(w0, hist_vdamp.r1(:,:,end));
+[re, im] = subband_kurtosis(w0, hist_vdamp.r1(:,:,end), opts.wavType);
 disp(['NMSE: ', num2str(NMSE(hist_vdamp.x_mse(end)))])
 disp(['Convergent index/time: ', num2str([conv_vdamp, hist_vdamp.timer( conv_vdamp)])])
 disp(['Kurtosis re/im: ' , num2str([re, im])])
 
 disp('** VDAMP-S **')
-[re, im]  = subband_kurtosis(w0, hist_vdamp_s.r1(:,:,end));
+[re, im]  = subband_kurtosis(w0, hist_vdamp_s.r1(:,:,end), opts.wavType);
 disp(['NMSE: ', num2str(NMSE(hist_vdamp_s.x_mse(end)))])
 disp(['Convergent index/time: ', num2str([conv_vdamp_s, hist_vdamp_s.timer( conv_vdamp_s)])])
 disp(['Kurtosis re/im: ' , num2str([re, im])])
