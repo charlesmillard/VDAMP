@@ -255,7 +255,7 @@ function [x_hat, hist] = VDAMP(dcoil, mask, prob_map, var0, x0, opts)
         end
  
         if verbose % band-wise progress of thresholded image 
-             x = multiscaleRecon(C_thr);
+             x = multiscaleRecon(C_thr, wavType);
             fprintf('Wavelet belief: true RMSE = %f\n', sqrt(mean(abs(x(:)-x0(:)).^2)));
             for s=1:scales
                 subbands = fieldnames(C{s});
